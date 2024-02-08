@@ -1,7 +1,9 @@
 package com.example.weather.service;
 
+import com.example.weather.dao.CoordinatesDAO;
 import com.example.weather.dao.WeatherDAO;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
@@ -10,11 +12,15 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.sql.SQLException;
 
 @Service
 public class WeatherService {
-    public JSONObject getWeatherObject(String width, String longitude) throws IOException {
-        URL yandexWeatherUrl = new URL("https://api.weather.yandex.ru/v2/informers?lat=55.7522&lon=37.6156");
+    @Autowired
+    JDBCConnector jdbcConnector;
+    public JSONObject getWeatherObject() throws IOException {
+        URL yandexWeatherUrl = new URL("https://api.weather.yandex.ru/v2/informers?lat="
+                + jdbcConnector.coordinates.getWidth() + "&lon=" + jdbcConnector.coordinates.getLongitude());
         HttpURLConnection yandexWeatherCon = (HttpURLConnection) yandexWeatherUrl.openConnection();
         yandexWeatherCon.setRequestMethod("GET");
         yandexWeatherCon.setRequestProperty("X-Yandex-API-Key", "fecb42ed-bfd3-4946-8310-80def00f9b11");
@@ -34,6 +40,7 @@ public class WeatherService {
 
     public WeatherDAO getWeather() throws IOException{
         WeatherDAO weatherDAO = new WeatherDAO();
+        weatherDAO.setNameCity(jdbcConnector.coordinates.getName());
         weatherDAO.setTemp(getWeatherObject().getJSONObject("fact").getInt("temp"));
         weatherDAO.setIcon(getWeatherObject().getJSONObject("fact").getString("icon"));
         weatherDAO.setWindSpeed(getWeatherObject().getJSONObject("fact").getInt("wind_speed"));

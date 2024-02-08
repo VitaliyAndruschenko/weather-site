@@ -6,6 +6,8 @@ import java.time.LocalDate;
 
 @Data
 public class WeatherDAO {
+    //Название города
+    private String nameCity;
     //Температура
     private Integer temp;
     //Иконка температуры
